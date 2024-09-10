@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://unpkg.com/js-datepicker/dist/datepicker.min.css" />
+    <link rel="stylesheet" href="/_webresources/nw_/Styles/BatchBirthdayCongratulation/Index" />
+    <script src="https://unpkg.com/js-datepicker" defer></script>
+    <script src="/_webresources/nw_SMPTLibrary" defer></script>
+    <script src="/_webresources/nw_/Scripts/BatchBirthdayCongratulation/Index" defer></script>
+    <title>Batch Birthday Congratulation</title>
+  </head>
+  <body>
+    <div class="app inter-variable">
+      <section class="datepicker">
+        <h2 className="datepicker__title ">Select date range:</h2>
+        <div class="datepicker__dates">
+          <div
+            class="datepicker__field datepicker__field--start"
+            data-value-target="start"
+            data-value
+          >
+            <p class="datepicker__label datepicker__label--start" data-priority>Start Date</p>
+            <p class="datepicker__value datepicker__value--start"></p>
+            <img
+              class="datepicker__icon"
+              src="/_webresources/nw_/Icons/Calendar"
+              width="24"
+              height="24"
+            />
+          </div>
+          <div class="datepicker__field datepicker__field--end" data-value-target="end" data-value>
+            <p class="datepicker__label datepicker__label--end" data-priority>End Date</p>
+            <p class="datepicker__value datepicker__value--end"></p>
+            <img
+              class="datepicker__icon"
+              src="/_webresources/nw_/Icons/Calendar"
+              width="24"
+              height="24"
+            />
+          </div>
+        </div>
+      </section>
+      <section class="btns">
+        <button class="btn btn-start btn--primary" disabled="true">Start</button>
+        <button class="btn btn-cancel btn--destructive" disabled="true">Cancel</button>
+      </section>
+      <section class="progress-bar">
+        <div class="progress-bar__indicator" data-value></div>
+        <div class="progress-bar__status"></div>
+      </section>
+    </div>
+  </body>
+</html>
