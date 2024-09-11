@@ -91,7 +91,7 @@ async function retrieveAllContacts() {
   function getContactsPage(nextLink) {
     let query = nextLink
       ? nextLink
-      : `?$select=birthdate,emailaddress1,firstname,lastname&$filter=birthdate ne null and nw_last_birthday_congrat eq null`
+      : `?$select=birthdate,emailaddress1,firstname,lastname,gendercode&$filter=birthdate ne null and nw_last_birthday_congrat eq null`
 
     return new Promise((resolve, reject) => {
       window.opener.Xrm.WebApi.retrieveMultipleRecords("contact", query).then(
@@ -125,14 +125,24 @@ async function sendCongratulations(contacts) {
   }
 
   for (const [idx, contact] of contacts.entries()) {
-    const { emailaddress1, firstname, lastname, birthdate, contactid } = contact
-    const fullName = `${firstname} ${lastname}`
+    const {
+      emailaddress1: email,
+      firstname,
+      lastname,
+      contactid,
+      gendercode: genderValue,
+    } = contact
     const isLast = idx === contacts.length - 1
 
     try {
       await wait(200)
 
-      const emailResponse = await sendEmail(emailaddress1, fullName)
+      const emailResponse = await GlobalHelper.sendCongratulationEmail({
+        firstname,
+        lastname,
+        email,
+        genderValue,
+      })
       if (emailResponse !== "OK") {
         console.log("Email error")
         throw new Error("Message hasn't been sent!")
@@ -153,16 +163,6 @@ async function sendCongratulations(contacts) {
       return
     }
   }
-}
-
-function sendEmail(email, name) {
-  return Email.send({
-    SecureToken: "3dac010a-4bea-4187-9b8a-d630ac47693c",
-    From: "vasilechek9786@gmail.com",
-    To: email,
-    Subject: "Happy birthday!",
-    Body: `Hi ${name}, Happy Birthday and all the best!`,
-  })
 }
 
 function updateLastBirthdayCongratField(id, date) {
