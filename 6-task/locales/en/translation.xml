@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <root>
+     <datepicker>
+         <title>Select date range:</title>
+         <label-start>Start Date</label-start>
+         <label-end>End Date</label-end>
+     </datepicker>
+     <btns>
+         <start>Start</start>
+         <cancel>Cancel</cancel>
+     </btns>
+     <alerts>
+        <cancel>Are you sure that you want to cancel the processing?</cancel>
+     </alerts>
+     <progress-bar>
+        <empty>No contacts were found who have a birthday in the specified range</empty>
+        <status>Processed contacts {{processedContacts}} from {{totalContacts}}</status>
+        <finalStatus>`{{processedContacts}} contacts are processed, {{successfullContacts}} congratulation e-mails were suceesfully sent (sending of {{failedContacts}} e-mails failed)".`</finalStatus> 
+     </progress-bar>
+ </root>
