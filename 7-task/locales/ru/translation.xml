@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <root>
+    <template>
+        <text>Выберите тип поздравления:</text>
+        <placeholder>Выберите тип</placeholder>
+    </template>
+     <datepicker>
+         <title>Выберите диапозон дат:</title>
+         <label-start>Начальная дата</label-start>
+         <label-end>Конечная дата</label-end>
+     </datepicker>
+     <btns>
+         <start>Начать</start>
+         <cancel>Отменить</cancel>
+     </btns>
+     <alerts>
+        <cancel>Вы уверены, что хотите отменить обработку?</cancel>
+     </alerts>
+     <progress-bar>
+        <empty>Не найдено контактов, у которых дни рождения находятся в указанном диапазоне</empty>
+        <status>Обработанно контактов {{processedContacts}} из {{totalContacts}}</status>
+        <finalStatus>{{processedContacts}} коньактов обработано, {{successfullContacts}} поздравительных электронных писем успешно отправлены (отправка {{failedContacts}} электронных писем не удалась)".</finalStatus> 
+     </progress-bar>
+ </root>

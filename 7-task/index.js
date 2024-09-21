@@ -1,3 +1,7 @@
+const $templateSelect = document.querySelector(".template-select")
+const $templateSelectPlaceholder = document.querySelector(".template-select__placeholder")
+const $templateText = document.querySelector(".template-text")
+const $datepicker = document.querySelector(".datepicker")
 const $datepickerTitle = document.querySelector(".datepicker__title")
 const $startDate = document.querySelector(".datepicker__field--start")
 const $endDate = document.querySelector(".datepicker__field--end")
@@ -9,23 +13,87 @@ const $startBtn = document.querySelector(".btn-start")
 const $cancelBtn = document.querySelector(".btn-cancel")
 const $progressIndicator = document.querySelector(".progress-bar__indicator")
 const $progressStatus = document.querySelector(".progress-bar__status")
+
 const Xrm = window?.Xrm || window?.parent?.Xrm || window?.opener?.Xrm
 
+initI18n()
+loadTemplateTypes()
+
+$templateSelect.addEventListener("change", handleTemplateChange)
 $startBtn.addEventListener("click", startProcessing)
 $cancelBtn.addEventListener("click", cancelProcessing)
-
-renderText()
+i18next.on("initialized", renderText)
 
 let shouldStopProcess = false
+let isDatepickerInited = false
+const templateOptionsMap = {}
 
-const datepickerOptions = {
-  id: 1,
-  onSelect: onDatepickerSelect,
-  minDate: new Date(),
+// TEMPLATE
+
+async function loadTemplateTypes() {
+  const entityLogicalName = "nw_emailtemplate"
+  const attributeLogicalName = "nw_type"
+
+  const url = `${Xrm.Utility.getGlobalContext().getClientUrl()}/api/data/v9.1/EntityDefinitions(LogicalName='${entityLogicalName}')/Attributes(LogicalName='${attributeLogicalName}')/Microsoft.Dynamics.CRM.PicklistAttributeMetadata?$select=LogicalName&$expand=OptionSet`
+  const headers = {
+    "OData-MaxVersion": "4.0",
+    "OData-Version": "4.0",
+    Accept: "application/json",
+    "Content-Type": "application/json; charset=utf-8",
+  }
+
+  const response = await fetch(url, { headers })
+
+  if (!response.ok) return console.error(response.statusText)
+
+  const data = await response.json()
+  const options = data.OptionSet.Options
+
+  options.forEach(function (option) {
+    const { Value, Label } = option
+    templateOptionsMap[option.Value] = option.Label.LocalizedLabels[0].Label
+
+    const $option = document.createElement("option")
+    $option.value = Value
+    $option.textContent = capitalize(Label.LocalizedLabels[0].Label)
+    $templateSelect.appendChild($option)
+  })
+
+  $templateSelect.value = ""
 }
 
-const startPicker = datepicker($startDate, datepickerOptions)
-const endPicker = datepicker($endDate, datepickerOptions)
+function handleTemplateChange(e) {
+  const value = e.target.value
+
+  switch (value) {
+    case String(125050000):
+      showDatepicker()
+      if (!isDatepickerInited) initDatepicker()
+      break
+    case "":
+      hideDatepicker()
+      $startBtn.disabled = true
+      break
+    default:
+      clearProgressBar()
+      hideDatepicker()
+      $startBtn.disabled = false
+  }
+}
+
+// DATEPICKER
+
+function initDatepicker() {
+  const datepickerOptions = {
+    id: 1,
+    onSelect: onDatepickerSelect,
+    minDate: new Date(),
+  }
+
+  const startPicker = datepicker($startDate, datepickerOptions)
+  const endPicker = datepicker($endDate, datepickerOptions)
+  isDatepickerInited = true
+}
 
 function onDatepickerSelect(instance) {
   const dateTarget = instance.el.dataset.valueTarget
@@ -70,6 +138,16 @@ function validateEndDate(endDate, instance) {
 
   return true
 }
+
+function showDatepicker() {
+  $datepicker.classList.remove("hide")
+}
+
+function hideDatepicker() {
+  $datepicker.classList.add("hide")
+}
+
+// BATCH PROCESSING
 
 async function startProcessing() {
   $startBtn.disabled = true
@@ -245,6 +323,11 @@ function defineProgressBar(total) {
   }
 }
 
+function clearProgressBar() {
+  $progressStatus.innerHTML = ""
+  $progressIndicator.style.setProperty("--progress", 0)
+}
+
 function filterContacts(contacts) {
   if (!contacts?.length) return []
   const normalizedStartDate = getNormalizedDateValue($datepickerValueStart)
@@ -263,12 +346,75 @@ function filterContacts(contacts) {
   })
 }
 
+// INTERNATIONALIZATION
+
+async function initI18n() {
+  const mapCodeToLng = {
+    1049: "ru",
+    1033: "en",
+    2057: "en",
+    3081: "en",
+    4105: "en",
+    5129: "en",
+    6153: "en",
+    7177: "en",
+    8201: "en",
+    9225: "en",
+    10249: "en",
+    11273: "en",
+    12297: "en",
+    13321: "en",
+    14345: "en",
+    15369: "en",
+    16393: "en",
+    17417: "en",
+    18441: "en",
+  }
+  const mapLngToPath = {
+    ru: "/_webresources/nw_/Translations/BatchBirthdayCongratulation/ru",
+    en: "/_webresources/nw_/Translations/BatchBirthdayCongratulation/en",
+  }
+  const { userSettings } = Xrm.Utility.getGlobalContext()
+  const lng = mapCodeToLng[userSettings?.languageId || 1033]
+  const path = mapLngToPath[lng]
+
+  const response = await fetch(path)
+  const xmlString = await response.text()
+
+  const parser = new DOMParser()
+  const xmlDoc = parser.parseFromString(xmlString, "application/xml")
+  const translation = await xmlToJson(xmlDoc.documentElement)
+
+  i18next.init({
+    lng,
+    interpolation: {
+      escapeValue: false,
+    },
+    fallbackLng: "en",
+    resources: {
+      [lng]: {
+        translation,
+      },
+    },
+  })
+}
+
+// UI
+
 function renderText() {
+  $templateText.innerHTML = i18next.t("template.text")
+  $templateSelectPlaceholder.innerHTML = i18next.t("template.placeholder")
   $datepickerTitle.innerHTML = i18next.t("datepicker.title")
   $datepickerLabelStart.innerHTML = i18next.t("datepicker.label-start")
   $datepickerLabelEnd.innerHTML = i18next.t("datepicker.label-end")
   $startBtn.innerHTML = i18next.t("btns.start")
   $cancelBtn.innerHTML = i18next.t("btns.cancel")
+}
+
+// UTILS
+
+function capitalize(str) {
+  return str[0].toUpperCase() + str.slice(1)
 }
 
 function getNormalizedDateValue(el) {
@@ -295,4 +441,33 @@ function clearDate($label, $value) {
 
 function wait(delay) {
   return new Promise((resolve) => setTimeout(() => resolve(), delay))
+}
+
+function xmlToJson(xml) {
+  let obj = {}
+
+  if (xml.nodeType === 1 && xml.hasChildNodes()) {
+    for (let i = 0; i < xml.childNodes.length; i++) {
+      let child = xml.childNodes[i]
+
+      if (child.nodeType === 3 && child.nodeValue.trim() === "") continue
+
+      let childName = child.nodeName
+
+      if (child.nodeType === 3) {
+        return child.nodeValue.trim()
+      }
+
+      if (typeof obj[childName] === "undefined") {
+        obj[childName] = xmlToJson(child)
+      } else {
+        if (!Array.isArray(obj[childName])) {
+          obj[childName] = [obj[childName]]
+        }
+        obj[childName].push(xmlToJson(child))
+      }
+    }
+  }
+
+  return obj
 }

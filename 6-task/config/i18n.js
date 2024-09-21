@@ -24,7 +24,8 @@
     ru: "/_webresources/nw_/Translations/BatchBirthdayCongratulation/ru",
     en: "/_webresources/nw_/Translations/BatchBirthdayCongratulation/en",
   }
-  const { userSettings } = window.opener.Xrm.Utility.getGlobalContext()
+  const Xrm = window?.Xrm || window?.parent?.Xrm || window?.opener?.Xrm
+  const { userSettings } = Xrm.Utility.getGlobalContext()
   const lng = mapCodeToLng[userSettings?.languageId || 1049]
   const path = mapLngToPath[lng]
 
