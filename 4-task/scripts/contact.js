@@ -14,19 +14,22 @@ var Contact = {
     const email = formContext.getAttribute("emailaddress1").getValue()
     const lastCongratDateAttr = formContext.getAttribute("nw_last_birthday_congrat")
     const isBirthdayFieldDirty = birthdayAttr.getIsDirty()
+    const { languageId } = Xrm.Utility.getGlobalContext().userSettings
+    const language = mapCodeToLng[languageId]
+    const birthdayTypeValue = 125050000
 
     // SET GENDER
 
-    if (genderValue) return
+    if (!genderValue) {
+      try {
+        const data = await ContactApi.fetchGenderByFullName(firstName, lastName)
+        const likelyGender = data.personalNames[0].likelyGender
+        const newGenderValue = likelyGender == "male" ? 1 : 2
 
-    try {
-      const data = await ContactApi.fetchGenderByFullName(firstName, lastName)
-      const likelyGender = data.personalNames[0].likelyGender
-      const newGenderValue = likelyGender == "male" ? 1 : 2
-
-      genderAttribute.setValue(newGenderValue)
-    } catch (err) {
-      console.error(err)
+        genderAttribute.setValue(newGenderValue)
+      } catch (err) {
+        console.error(err)
+      }
     }
 
     // VALIDATE BIRTHDAY AND SEND CONGRATULATIONS
@@ -44,7 +47,9 @@ var Contact = {
         firstName,
         lastName,
         email,
-        genderValue,
+        genderValue: genderAttribute.getValue(),
+        templateTypeValue: birthdayTypeValue,
+        language,
       }).then((message) => {
         alert(message)
         alert(`A message has been sent to "${email}", check your email!`)
